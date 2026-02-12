@@ -1,0 +1,14 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#020617"/>
+  <rect x="350" y="110" width="500" height="580" rx="16" fill="#0F172A" stroke="#334155" stroke-width="4"/>
+  <rect x="400" y="550" width="400" height="95" rx="10" fill="#155E75"/>
+  <rect x="430" y="575" width="340" height="55" rx="8" fill="#E2E8F0"/>
+  <line x1="360" y1="220" x2="840" y2="220" stroke="#334155" stroke-width="3"/>
+  <line x1="360" y1="330" x2="840" y2="330" stroke="#334155" stroke-width="3"/>
+  <line x1="360" y1="440" x2="840" y2="440" stroke="#334155" stroke-width="3"/>
+  <circle cx="250" cy="170" r="44" fill="#0E7490"/>
+  <text x="250" y="178" fill="#E0F2FE" text-anchor="middle" font-size="18" font-family="Arial">TOP</text>
+  <circle cx="250" cy="400" r="44" fill="#1E293B"/>
+  <text x="250" y="408" fill="#CBD5E1" text-anchor="middle" font-size="18" font-family="Arial">PIT</text>
+  <text x="600" y="760" fill="#94A3B8" text-anchor="middle" font-size="24" font-family="Arial">Low performance mode illustration</text>
+</svg>

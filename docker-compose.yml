@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swaelco-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:/app/data/dev.db
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: change-this-before-production
+      NODE_ENV: production
+    volumes:
+      - swaelco_data:/app/data
+      - swaelco_uploads:/app/public/uploads
+
+volumes:
+  swaelco_data:
+  swaelco_uploads:

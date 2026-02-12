@@ -1,36 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SWAELCO Elevators Platform
 
-## Getting Started
+Modern, lightweight Next.js 15 app for an elevator installer company with:
 
-First, run the development server:
+- Public marketing site (SSG)
+- Authenticated customer portal
+- Internal role-based operations dashboard
+- Prisma + SQLite backend
+- NextAuth credentials auth
+- RHF + Zod forms
+- Lazy-loaded 3D elevator viewer
+
+## Stack
+
+- Next.js (App Router, TypeScript, Server Components)
+- Tailwind CSS + shadcn-style UI primitives
+- Prisma + SQLite
+- NextAuth
+- React Hook Form + Zod
+- `@react-three/fiber` + `three` (lazy-only marketing viewer)
+
+## Local Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Configure environment:
+
+```bash
+cp .env.example .env
+```
+
+3. Initialize database and seed data:
+
+```bash
+npm run db:bootstrap
+```
+
+4. Run development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Docker (Easy Backend + App Run)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Set a real secret in `docker-compose.yml` (or override with env):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+openssl rand -base64 32
+```
 
-## Learn More
+2. Start with Docker Compose:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker compose up --build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This will:
+- Build the app image
+- Start on `http://localhost:3000`
+- Auto-bootstrap SQLite on first run
+- Persist database in volume `swaelco_data`
+- Persist uploads in volume `swaelco_uploads`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Stop:
 
-## Deploy on Vercel
+```bash
+docker compose down
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Reset DB data (optional destructive):
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker compose down -v
+```
+
+## Demo Accounts
+
+- Admin: `admin@swaelco.com` / `Admin123!`
+- Project manager: `pm@swaelco.com` / `Manager123!`
+- Technician: `tech@swaelco.com` / `Tech123!`
+- Customer: `customer@acmetowers.com` / `Customer123!`
+
+## Scripts
+
+- `npm run dev` - start local dev server
+- `npm run build` - production build
+- `npm run start` - start production server
+- `npm run lint` - lint checks
+- `npm run db:bootstrap` - create SQLite schema + seed (portable fallback)
+- `npm run db:seed` - reseed demo data
+- `npm run db:migrate` - Prisma migrate dev (may fail in restricted sandboxes)
+- `npm run db:push` - Prisma db push
+
+## Key Routes
+
+Public:
+
+- `/`
+- `/services`
+- `/about`
+- `/contact`
+
+Auth:
+
+- `/login`
+- `/register`
+
+App:
+
+- `/dashboard`
+- `/projects`, `/projects/[id]`
+- `/customers`, `/customers/[id]`
+- `/buildings`, `/buildings/[id]`
+- `/tasks`
+- `/profile`
+
+API:
+
+- `/api/auth/**`
+- `/api/projects/**`
+- `/api/customers/**`
+- `/api/buildings/**`
+- `/api/tasks`
+- `/api/documents/upload`
+
+## Notes
+
+- Marketing pages are static by default for low server overhead.
+- 3D code is client-only and lazy-loaded with low-performance fallback mode.
+- RBAC is enforced both in UI and API handlers.
+- Customer records support soft-delete and optional anonymization.

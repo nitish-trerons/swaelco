@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  project_manager
+  technician
+  customer
+}
+
+enum ElevatorStatus {
+  planned
+  installation
+  operational
+  out_of_service
+}
+
+enum ProjectType {
+  new_installation
+  modernization
+  repair
+}
+
+enum ProjectStatus {
+  inquiry
+  quoted
+  approved
+  in_progress
+  inspection
+  completed
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  done
+  cancelled
+}
+
+enum DocumentType {
+  blueprint
+  permit
+  contract
+  inspection_report
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String?
+  email        String         @unique
+  passwordHash String
+  role         Role           @default(customer)
+  customerId   String?        @unique
+  customer     Customer?      @relation("CustomerUser", fields: [customerId], references: [id], onDelete: SetNull)
+  assignedTasks Task[]        @relation("TaskAssignee")
+  comments     ProjectComment[]
+  auditLogs    AuditLog[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([role])
+}
+
+model Customer {
+  id             String      @id @default(cuid())
+  name           String
+  contactEmail   String      @unique
+  contactPhone   String?
+  billingAddress String?
+  notes          String?
+  isDeleted      Boolean     @default(false)
+  anonymizedAt   DateTime?
+  user           User?       @relation("CustomerUser")
+  buildings      Building[]
+  projects       Project[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([isDeleted])
+}
+
+model Building {
+  id         String     @id @default(cuid())
+  customerId String
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  name       String
+  address    String
+  floors     Int
+  notes      String?
+  elevators  Elevator[]
+  projects   Project[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([customerId])
+}
+
+model Elevator {
+  id         String         @id @default(cuid())
+  buildingId String
+  building   Building       @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  model      String
+  capacityKg Int
+  installDate DateTime?
+  status     ElevatorStatus @default(planned)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([buildingId])
+}
+
+model Project {
+  id          String           @id @default(cuid())
+  customerId  String
+  buildingId  String
+  customer    Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  building    Building         @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  name        String
+  type        ProjectType
+  status      ProjectStatus    @default(inquiry)
+  budget      Int?
+  actualCost  Int?
+  startDate   DateTime?
+  endDate     DateTime?
+  description String?
+  tasks       Task[]
+  documents   Document[]
+  comments    ProjectComment[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([customerId])
+  @@index([buildingId])
+  @@index([status])
+}
+
+model Task {
+  id               String      @id @default(cuid())
+  projectId        String
+  assignedToUserId String?
+  project          Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo       User?       @relation("TaskAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  title            String
+  description      String?
+  scheduledFor     DateTime?
+  status           TaskStatus  @default(pending)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([projectId])
+  @@index([assignedToUserId])
+  @@index([scheduledFor])
+}
+
+model Document {
+  id        String       @id @default(cuid())
+  projectId String
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  type      DocumentType
+  createdAt DateTime     @default(now())
+
+  @@index([projectId])
+}
+
+model ProjectComment {
+  id        String          @id @default(cuid())
+  projectId String
+  authorId  String
+  parentId  String?
+  body      String
+  project   Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author    User            @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  parent    ProjectComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies   ProjectComment[] @relation("CommentReplies")
+  createdAt DateTime        @default(now())
+
+  @@index([projectId, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
